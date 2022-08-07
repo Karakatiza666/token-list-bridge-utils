@@ -1,13 +1,16 @@
 import { TokenList } from '@uniswap/token-lists'
 import { cloneDeep, groupBy, merge } from 'lodash'
+import { extendTokenList } from './extend'
 import { ChainId } from './constants/chainId'
-import { buildList } from './providers'
+import { buildProviderList } from './providers'
 import {
   compareTokenInfos,
   getTokenList,
   TokenListOrFetchableTokenList,
 } from './utils'
 import { verifyExtensions } from './verify'
+
+export { extendTokenList } from './extend'
 
 /**
  * Adds bridgeInfo to the given token list for Optimism, Polygon and Arbitrum.
@@ -50,7 +53,7 @@ export async function chainifyTokenList(
 ): Promise<TokenList> {
   try {
     const l1TokenList = await getTokenList(l1TokenListOrPathOrUrl)
-    const tokenList = await buildList(chainId, l1TokenList)
+    const tokenList = extendTokenList(await buildProviderList(chainId, l1TokenList))
     return verifyExtensions(tokenList)
   } catch (e) {
     throw new Error(`An error occured: ${e}`)

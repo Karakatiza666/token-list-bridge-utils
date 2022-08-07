@@ -16,7 +16,7 @@ import Web3 from 'web3'
 
 const web3 = new Web3()
 
-export async function buildList(
+export async function buildProviderList(
   chainId: ChainId,
   l1TokenList: TokenList
 ): Promise<TokenList> {
@@ -40,19 +40,6 @@ export async function buildList(
     )
 
     if (rootToken.chainId === ChainId.MAINNET) {
-      // build extension info if available
-      const toRootExtensions = childTokenValid
-        ? {
-            extensions: {
-              bridgeInfo: {
-                [rootToken.chainId]: {
-                  tokenAddress: ethers.utils.getAddress(rootToken.address),
-                },
-              },
-            },
-          }
-        : {}
-
       const toChildExtensions = childTokenValid
         ? {
             extensions: {
@@ -69,16 +56,6 @@ export async function buildList(
         ...rootToken,
         ...toChildExtensions,
       } as unknown as TokenInfo
-
-      if (childTokenValid) {
-        const childTokenInfo: TokenInfo = {
-          ...rootToken,
-          chainId: chainId,
-          address: childTokenAddress,
-          ...toRootExtensions,
-        } as unknown as TokenInfo
-        mappedTokens.push(childTokenInfo)
-      }
       mappedTokens.push(rootTokenInfo)
     }
   }
@@ -86,7 +63,7 @@ export async function buildList(
     name: `(ChainId: ${chainId}) ${l1TokenList.name}`,
     timestamp: new Date().toISOString(),
     version: l1TokenList.version,
-    tokens: mappedTokens.sort(compareTokenInfos),
+    tokens: mappedTokens,
   }
 
   return tokenList
